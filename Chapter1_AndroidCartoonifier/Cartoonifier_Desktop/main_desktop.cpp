@@ -32,7 +32,7 @@ bool m_evilMode = false;
 bool m_debugMode = false;
 
 bool m_enableDisplay = false;
-
+bool m_enableOctoscroller = true;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -165,6 +165,11 @@ int main(int argc, char *argv[])
         if(m_enableDisplay) {
             imshow(windowName, displayedFrame);
         }
+
+        if(m_enableOctoscroller) {
+            Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
+        }
+
 
         // IMPORTANT: Wait for atleast 20 milliseconds, so that the image can be displayed on the screen!
         // Also checks if a key was pressed in the GUI window. Note that it should be a "char" to support Linux.
