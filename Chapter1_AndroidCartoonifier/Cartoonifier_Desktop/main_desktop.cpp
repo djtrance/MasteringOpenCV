@@ -22,12 +22,12 @@ const int NUM_STICK_FIGURE_ITERATIONS = 40; // Sets how long the stick figure fa
 const char *windowName = "Cartoonifier";   // Name shown in the GUI window.
 
 #define MODE  \
-  (m_enableBypass?1:0 | \
-   m_enablePalette?2:0 | \
-   m_enablePalette2?4:0 | \
-   m_sketchMode?8:0 | \
-   m_alienMode?16:0 | \
-   m_evilMode?32:0)
+  ((m_enableBypass?1:0) | \
+   (m_enablePalette?2:0) | \
+   (m_enablePalette2?4:0) | \
+   (m_sketchMode?8:0) | \
+   (m_alienMode?16:0) | \
+   (m_evilMode?32:0))
 
 // Set to true if you want to see line drawings instead of paintings.
 bool m_sketchMode = false;
@@ -196,18 +196,46 @@ int main(int argc, char *argv[])
         octoSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
 
-    int countToModeAdvance = 100;
+    int countToModeAdvance = 200;
     // Run forever, until the user hits Escape to "break" out of this loop.
     while (true) {
         countToModeAdvance--;
-        if(countToModeAdvance == 0) {
-            countToModeAdvance = 100;
+        if(countToModeAdvance <= 0) {
             switch(MODE) {
                 case 1:
+                    countToModeAdvance = 100;
                     m_sketchMode = true;
                     m_enableBypass = false;
                     break;
+                case 8:
+                    countToModeAdvance = 300;
+                    m_sketchMode = false;
+                    break;
+                case 0:
+                    countToModeAdvance = 30;
+                    m_enablePalette = true;
+                    break;
+                case 2:
+                    countToModeAdvance = 200;
+                    m_enablePalette = false;
+                    m_enablePalette2 = true;
+                    break;
+                case 4:
+                    //printf("Started alien mode\n");
+                    countToModeAdvance = 200;
+                    m_alienMode = true;
+                    m_stickFigureIterations = 50;
+                    m_enablePalette2 = false;
+                    break;
+                case 16:
+                    //printf("Ended alien mode\n");
+                    countToModeAdvance = 100;
+                    m_alienMode = false;
+                    m_evilMode = true;
+                    m_enablePalette2 = true;
+                    break;
                 default:
+                    countToModeAdvance = 200;
                     m_enableBypass = true;
                     m_enablePalette = false;
                     m_enablePalette2 = false;
@@ -251,7 +279,7 @@ int main(int argc, char *argv[])
 
         if(m_enableOctoscroller) {
             memset(octoData+1, 0, 128*3*8);
-            ledscape_printf(octoData+1, 128, 0xFF0000, "Mastering OpenCV - %02x", MODE);
+            ledscape_printf(octoData+1, 128, 0xFF0000, "Mastering OpenCV - %d", MODE);
 
             //Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
             for(int i = 0; i < 128; i++) {
