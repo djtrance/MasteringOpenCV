@@ -34,6 +34,7 @@ bool m_debugMode = false;
 bool m_enableDisplay = false;
 bool m_enableOctoscroller = true;
 bool m_enablePalette = true;
+bool m_enablePalette2 = true;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -124,6 +125,10 @@ int main(int argc, char *argv[])
     uint8_t * octoData = (uint8_t *)calloc(octoSize, 1);
     octoData[0] = 0;
 
+    const uint8_t paletteRed[] =   { 0x00, 0x20, 0x20, 0x80, 0x80, 0xe0, 0xe0, 0xe0 };
+    const uint8_t paletteGreen[] = { 0x00, 0x20, 0x20, 0x20, 0x20, 0x80, 0x80, 0xe0 };
+    const uint8_t paletteBlue[] =  { 0x00, 0x20, 0x20, 0x40, 0x60, 0x60, 0x60, 0xe0 };
+
     uint8_t palette[PALETTE_SIZE][3] =
     {
         {0x00, 0x00, 0x00},
@@ -210,7 +215,14 @@ int main(int argc, char *argv[])
             //Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
             for(int i = 0; i < 128; i++) {
                 for(int j = 0; j < 120; j++) {
-                    if(m_enablePalette) {
+                    if(m_enablePalette2) {
+                        uint8_t red = ((uint8_t)displayedFrame.at<Vec3b>(j,i+16)[RED] >> 5);
+                        octoData[1+3*(i+j*128)+3*8*128] = paletteRed[red];
+                        uint8_t green = ((uint8_t)displayedFrame.at<Vec3b>(j,i+16)[GREEN] >> 5);
+                        octoData[2+3*(i+j*128)+3*8*128] = paletteGreen[green];
+                        uint8_t blue = ((uint8_t)displayedFrame.at<Vec3b>(j,i+16)[BLUE] >> 5);
+                        octoData[3+3*(i+j*128)+3*8*128] = paletteBlue[blue];
+                    } else if(m_enablePalette) {
                         float minDistance = dist(palette[0], displayedFrame.at<Vec3b>(j,i+16));
                         int index = 0;
                         for(int k = 1; k < PALETTE_SIZE; k++) {
@@ -239,6 +251,7 @@ int main(int argc, char *argv[])
         }
 
 
+        if(!m_enableOctoscroller) {
         // IMPORTANT: Wait for atleast 20 milliseconds, so that the image can be displayed on the screen!
         // Also checks if a key was pressed in the GUI window. Note that it should be a "char" to support Linux.
         char keypress = waitKey(20);  // This is needed if you want to see anything!
@@ -249,6 +262,7 @@ int main(int argc, char *argv[])
         // Process any other keypresses.
         if (keypress > 0) {
             onKeypress(keypress);
+        }
         }
 
     }//end while
