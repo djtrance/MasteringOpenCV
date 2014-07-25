@@ -41,6 +41,14 @@ bool m_enablePalette2 = false;
 #include <stdlib.h>
 #include <netinet/in.h>
 
+extern void
+ledscape_printf(
+	uint8_t * dst,
+	const size_t width,
+	const uint32_t color,
+	const char * fmt,
+	...
+);
 
 // Include OpenCV's C++ Interface
 #include "opencv2/opencv.hpp"
@@ -216,6 +224,15 @@ int main(int argc, char *argv[])
         }
 
         if(m_enableOctoscroller) {
+            memset(octoData+1, 0, 128*3*8);
+            ledscape_printf(octoData+1, 128, 0xFF0000, "Mastering OpenCV - %02x",
+                m_enableBypass?1:0 |
+                m_enablePalette?2:0 |
+                m_enablePalette2?4:0 |
+                m_sketchMode?8:0 |
+                m_alienMode?16:0 |
+                m_evilMode?32:0);
+
             //Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
             for(int i = 0; i < 128; i++) {
                 for(int j = 0; j < 120; j++) {

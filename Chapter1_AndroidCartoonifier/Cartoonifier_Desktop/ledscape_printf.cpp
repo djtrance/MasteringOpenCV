@@ -15,7 +15,7 @@ extern const uint8_t fixed_font[][5];
 
 void
 ledscape_draw_char(
-	uint32_t * px,
+	uint8_t * dst,
 	const size_t width,
 	const uint32_t color,
 	char c
@@ -25,11 +25,15 @@ ledscape_draw_char(
 		c = '?';
 
 	const uint8_t* const f = fixed_font[c - 0x20];
-	for (int i = 0 ; i < 5 ; i++, px++)
+	for (int i = 0 ; i < 5 ; i++, dst+=3)
 	{
 		uint8_t bits = f[i];
 		for (int j = 0 ; j < 7 ; j++, bits >>= 1)
-			px[j*width] = bits & 1 ? color : 0;
+		{
+			dst[j*width*3+0] = bits & 1 ? (color >> 16) : 0;
+			dst[j*width*3+1] = bits & 1 ? (color >> 8) : 0;
+			dst[j*width*3+2] = bits & 1 ? (color >> 0) : 0;
+		}
 	}
 }
 
@@ -37,7 +41,7 @@ ledscape_draw_char(
 /** Write with a fixed-width 8px font */
 void
 ledscape_printf(
-	uint32_t * px,
+	uint8_t * dst,
 	const size_t width,
 	const uint32_t color,
 	const char * fmt,
@@ -50,9 +54,9 @@ ledscape_printf(
 	int len = vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 	(void) len;
-	uint32_t * start = px;
+	uint8_t * first = dst;
 
-	//printf("%p => '%s'\n", px, buf);
+	//printf("%p => '%s'\n", dst, buf);
 	for (unsigned i = 0 ; i < sizeof(buf) ; i++)
 	{
 		char c = buf[i];
@@ -60,11 +64,11 @@ ledscape_printf(
 			break;
 		if (c == '\n')
 		{
-			px = start = start + 8 * width;
+			dst = first = first + 8 * width * 3;
 			continue;
 		}
 
-		ledscape_draw_char(px, width, color, c);
-		px += 6;
+		ledscape_draw_char(dst, width, color, c);
+		dst += 6 * 3;
 	}
 }
