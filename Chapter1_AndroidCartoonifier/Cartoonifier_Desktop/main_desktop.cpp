@@ -36,6 +36,8 @@ bool m_enableOctoscroller = true;
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <netinet/in.h>
+
 
 // Include OpenCV's C++ Interface
 #include "opencv2/opencv.hpp"
@@ -102,6 +104,16 @@ void onKeypress(char key)
 
 int main(int argc, char *argv[])
 {
+    int octoSocket;
+    unsigned octoAddress = (127 << 24) | (0 << 16) | (0 << 8) | (1 << 0);
+    sockaddr_in octoAddr;
+    octoAddr.sin_family = AF_INET;
+    octoAddr.sin_addr.s_addr = htonl(octoAddress);
+    octoAddr.sin_port = htons(9999);
+    ssize_t octoSize = 128*120*3+1;
+    uint8_t * octoData = (uint8_t *)calloc(octoSize, 1);
+    octoData[0] = 0;
+
     cout << "Cartoonifier, by Shervin Emami (www.shervinemami.info), June 2012." << endl;
     cout << "Converts real-life images to cartoon-like images." << endl;
     cout << "Compiled with OpenCV version " << CV_VERSION << endl;
@@ -133,6 +145,10 @@ int main(int argc, char *argv[])
     // Create a GUI window for display on the screen.
     if(m_enableDisplay) {
         namedWindow(windowName); // Resizable window, might not work on Windows.
+    }
+
+    if(m_enableOctoscroller) {
+        octoSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     }
 
     // Run forever, until the user hits Escape to "break" out of this loop.
@@ -168,6 +184,16 @@ int main(int argc, char *argv[])
 
         if(m_enableOctoscroller) {
             Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
+            for(int i = 0; i < 128; i++) {
+                for(int j = 0; j < 120; j++) {
+                }
+            }
+            sendto(octoSocket, 
+                (void *)octoData, 
+                octoSize,
+                0,
+                (const sockaddr *)&octoAddr, 
+                sizeof(sockaddr_in));
         }
 
 
