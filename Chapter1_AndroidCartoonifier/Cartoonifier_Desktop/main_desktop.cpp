@@ -183,9 +183,12 @@ int main(int argc, char *argv[])
         }
 
         if(m_enableOctoscroller) {
-            Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
+            //Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
             for(int i = 0; i < 128; i++) {
                 for(int j = 0; j < 120; j++) {
+                    octoData[1+3*(i+j*128)] = displayedFrame.at<Vec3b>(j,i+16)[0];
+                    octoData[2+3*(i+j*128)] = displayedFrame.at<Vec3b>(j,i+16)[1];
+                    octoData[3+3*(i+j*128)] = displayedFrame.at<Vec3b>(j,i+16)[2];
                 }
             }
             sendto(octoSocket, 
