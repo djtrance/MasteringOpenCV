@@ -101,6 +101,10 @@ void onKeypress(char key)
     }
 }
 
+#define PALETTE_SIZE 5
+float dist(uint8_t a[], Vec3b b) {
+    return(sqrt(pow((float)a[0]-b[0],2)+pow((float)a[1]-b[1],2)+pow((float)a[2]-b[2],2)));
+}
 
 int main(int argc, char *argv[])
 {
@@ -113,6 +117,15 @@ int main(int argc, char *argv[])
     ssize_t octoSize = 128*128*3+1;
     uint8_t * octoData = (uint8_t *)calloc(octoSize, 1);
     octoData[0] = 0;
+
+    uint8_t palette[PALETTE_SIZE][3] =
+    {
+        {0, 0, 0},
+        {255, 0, 0},
+        {0, 255, 0},
+        {0, 0, 255},
+        {255, 255, 255}
+    };
 
     cout << "Cartoonifier, by Shervin Emami (www.shervinemami.info), June 2012." << endl;
     cout << "Converts real-life images to cartoon-like images." << endl;
@@ -186,9 +199,18 @@ int main(int argc, char *argv[])
             //Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
             for(int i = 0; i < 128; i++) {
                 for(int j = 0; j < 120; j++) {
-                    octoData[1+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[0];
-                    octoData[2+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[1];
-                    octoData[3+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[2];
+                    float minDistance = dist(palette[0], displayedFrame.at<Vec3b>(j,i+16));
+                    int index = 0;
+                    for(int k = 1; k < PALETTE_SIZE; k++) {
+                        float distance = dist(palette[k], displayedFrame.at<Vec3b>(j,i+16));
+                        if(distance < minDistance) {
+                            index = k;
+                            minDistance = distance;
+                        }
+                    }
+                    octoData[1+3*(i+j*128)+3*8*128] = palette[index][0];
+                    octoData[2+3*(i+j*128)+3*8*128] = palette[index][1];
+                    octoData[3+3*(i+j*128)+3*8*128] = palette[index][2];
                 }
             }
             sendto(octoSocket, 

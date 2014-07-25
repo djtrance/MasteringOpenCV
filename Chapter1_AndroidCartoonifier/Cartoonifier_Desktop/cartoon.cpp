@@ -81,10 +81,10 @@ void cartoonifyImage(Mat srcColor, Mat dst, bool sketchMode, bool alienMode, boo
 #else
     Mat tmp = Mat(fullSize, CV_8UC3);
 #endif
-    int repetitions = 1;        // Repetitions for strong cartoon effect.
+    int repetitions = 0;        // Repetitions for strong cartoon effect.
     for (int i=0; i<repetitions; i++) {
-        int size = 3;           // Filter size. Has a large effect on speed.
-        double sigmaColor = 19;  // Filter color strength.
+        int size = 9;           // Filter size. Has a large effect on speed.
+        double sigmaColor = 9;  // Filter color strength.
         double sigmaSpace = 7;  // Positional strength. Effects speed.
 #ifdef ENABLE_SMALL
         bilateralFilter(smallImg, tmp, size, sigmaColor, sigmaSpace);
