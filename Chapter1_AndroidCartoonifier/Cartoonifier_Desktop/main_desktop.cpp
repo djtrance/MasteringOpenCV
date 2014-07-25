@@ -33,6 +33,7 @@ bool m_debugMode = false;
 
 bool m_enableDisplay = false;
 bool m_enableOctoscroller = true;
+bool m_enablePalette = true;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,9 +102,14 @@ void onKeypress(char key)
     }
 }
 
-#define PALETTE_SIZE 18
+#define PALETTE_SIZE 10
+#define RED 2
+#define GREEN 0
+#define BLUE 1
 float dist(uint8_t a[], Vec3b b) {
-    return(sqrt(pow((float)a[0]-b[0],2)+pow((float)a[1]-b[1],2)+pow((float)a[2]-b[2],2)));
+    //return(sqrt(pow((float)a[0]-b[0],2)+pow((float)a[1]-b[1],2)+pow((float)a[2]-b[2],2)));
+    //return(abs((float)a[0]-b[0])+abs((float)a[1]-b[1])+abs((float)a[2]-b[2]));
+    return((float)((a[0]^(uint8_t)b[RED])+(a[1]^(uint8_t)b[GREEN])+(a[2]^(uint8_t)b[BLUE])));
 }
 
 int main(int argc, char *argv[])
@@ -121,23 +127,15 @@ int main(int argc, char *argv[])
     uint8_t palette[PALETTE_SIZE][3] =
     {
         {0x00, 0x00, 0x00},
-        {0x20, 0x10, 0x20},
-        {0x40, 0x10, 0x40},
-        {0x60, 0x40, 0xa0},
-        {0xc0, 0x40, 0xc0},
-        {0xff, 0x00, 0x00},
-        {0x00, 0xff, 0x00},
-        {0x00, 0x00, 0xff},
-        {0x70, 0xd0, 0x20},
-        {0x30, 0x70, 0x80},
-        {0xf0, 0xd0, 0xc0},
-        {0xd0, 0x30, 0x20},
-        {0xf0, 0xd0, 0x40},
-        {0xf0, 0x60, 0x20},
-        {0xf0, 0xb0, 0x20},
-        {0x80, 0xc0, 0xf0},
-        {0xe0, 0x80, 0xa0},
-        {0xff, 0xff, 0xff}
+        {0x2f, 0x00, 0x2f},
+        {0x20, 0x40, 0x20},
+        {0x80, 0x80, 0xb0},
+        {0xe0, 0xb0, 0x00},
+        {0xb0, 0x10, 0x20},
+        {0xe0, 0x80, 0x80},
+        {0xe0, 0x60, 0x20},
+        {0xe0, 0xb0, 0x20},
+        {0x80, 0xe0, 0xe0},
     };
 
     cout << "Cartoonifier, by Shervin Emami (www.shervinemami.info), June 2012." << endl;
@@ -212,18 +210,24 @@ int main(int argc, char *argv[])
             //Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
             for(int i = 0; i < 128; i++) {
                 for(int j = 0; j < 120; j++) {
-                    float minDistance = dist(palette[0], displayedFrame.at<Vec3b>(j,i+16));
-                    int index = 0;
-                    for(int k = 1; k < PALETTE_SIZE; k++) {
-                        float distance = dist(palette[k], displayedFrame.at<Vec3b>(j,i+16));
-                        if(distance < minDistance) {
-                            index = k;
-                            minDistance = distance;
+                    if(m_enablePalette) {
+                        float minDistance = dist(palette[0], displayedFrame.at<Vec3b>(j,i+16));
+                        int index = 0;
+                        for(int k = 1; k < PALETTE_SIZE; k++) {
+                            float distance = dist(palette[k], displayedFrame.at<Vec3b>(j,i+16));
+                            if(distance < minDistance) {
+                                index = k;
+                                minDistance = distance;
+                            }
                         }
+                        octoData[1+3*(i+j*128)+3*8*128] = palette[index][0];
+                        octoData[2+3*(i+j*128)+3*8*128] = palette[index][1];
+                        octoData[3+3*(i+j*128)+3*8*128] = palette[index][2];
+                    } else {
+                        octoData[1+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[RED];
+                        octoData[2+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[GREEN];
+                        octoData[3+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[BLUE];
                     }
-                    octoData[1+3*(i+j*128)+3*8*128] = palette[index][0];
-                    octoData[2+3*(i+j*128)+3*8*128] = palette[index][1];
-                    octoData[3+3*(i+j*128)+3*8*128] = palette[index][2];
                 }
             }
             sendto(octoSocket, 
