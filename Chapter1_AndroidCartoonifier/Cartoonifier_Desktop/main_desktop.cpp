@@ -31,10 +31,11 @@ bool m_evilMode = false;
 // Set to true if you want to see many windows created, showing various debug info. Set to 0 otherwise.
 bool m_debugMode = false;
 
+bool m_enableBypass = true;
 bool m_enableDisplay = false;
 bool m_enableOctoscroller = true;
-bool m_enablePalette = true;
-bool m_enablePalette2 = true;
+bool m_enablePalette = false;
+bool m_enablePalette2 = false;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -199,6 +200,9 @@ int main(int argc, char *argv[])
             debugType = 2;
 
         // Run the cartoonifier filter using the selected mode.
+        if(m_enableBypass)
+            displayedFrame = cameraFrame;
+        else
         cartoonifyImage(cameraFrame, displayedFrame, m_sketchMode, m_alienMode, m_evilMode, debugType);
 
         // Show a stick-figure outline of a face for a short duration, so the user knows where to put their face.
