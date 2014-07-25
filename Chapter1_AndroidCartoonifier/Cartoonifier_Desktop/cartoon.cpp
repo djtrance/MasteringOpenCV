@@ -62,32 +62,53 @@ void cartoonifyImage(Mat srcColor, Mat dst, bool sketchMode, bool alienMode, boo
 
     // Do the bilateral filtering at a shrunken scale, since it
     // runs so slowly but doesn't need full resolution for a good effect.
+#ifdef ENABLE_SMALL
     Size smallSize;
     smallSize.width = size.width/2;
     smallSize.height = size.height/2;
     Mat smallImg = Mat(smallSize, CV_8UC3);
     resize(srcColor, smallImg, smallSize, 0,0, INTER_LINEAR);
+#else
+    Size fullSize;
+    fullSize.width = size.width;
+    fullSize.height = size.height;
+#endif
 
     // Perform many iterations of weak bilateral filtering, to enhance the edges
     // while blurring the flat regions, like a cartoon.
+#ifdef ENABLE_SMALL
     Mat tmp = Mat(smallSize, CV_8UC3);
-    int repetitions = 7;        // Repetitions for strong cartoon effect.
+#else
+    Mat tmp = Mat(fullSize, CV_8UC3);
+#endif
+    int repetitions = 1;        // Repetitions for strong cartoon effect.
     for (int i=0; i<repetitions; i++) {
-        int size = 9;           // Filter size. Has a large effect on speed.
-        double sigmaColor = 9;  // Filter color strength.
+        int size = 3;           // Filter size. Has a large effect on speed.
+        double sigmaColor = 19;  // Filter color strength.
         double sigmaSpace = 7;  // Positional strength. Effects speed.
+#ifdef ENABLE_SMALL
         bilateralFilter(smallImg, tmp, size, sigmaColor, sigmaSpace);
         bilateralFilter(tmp, smallImg, size, sigmaColor, sigmaSpace);
+#else
+        bilateralFilter(srcColor, tmp, size, sigmaColor, sigmaSpace);
+        bilateralFilter(tmp, srcColor, size, sigmaColor, sigmaSpace);
+#endif
     }
 
     if (alienMode) {
         // Apply an "alien" filter, when given a shrunken image and the full-res edge mask.
         // Detects the color of the pixels in the middle of the image, then changes the color of that region to green.
+#ifdef ENABLE_SMALL
         changeFacialSkinColor(smallImg, edges, debugType);
+#else
+        changeFacialSkinColor(srcColor, edges, debugType);
+#endif
     }
 
     // Go back to the original scale.
+#ifdef ENABLE_SMALL
     resize(smallImg, srcColor, size, 0,0, INTER_LINEAR);
+#endif
 
     // Clear the output image to black, so that the cartoon line drawings will be black (ie: not drawn).
     memset((char*)dst.data, 0, dst.step * dst.rows);
