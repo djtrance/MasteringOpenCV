@@ -23,7 +23,7 @@ const char *windowName = "Cartoonifier";   // Name shown in the GUI window.
 
 
 // Set to true if you want to see line drawings instead of paintings.
-bool m_sketchMode = false;
+bool m_sketchMode = true;
 // Set to true if you want to change the skin color of the character to an alien color.
 bool m_alienMode = false;
 // Set to true if you want an evil "bad" character instead of a "good" character.
@@ -31,6 +31,7 @@ bool m_evilMode = false;
 // Set to true if you want to see many windows created, showing various debug info. Set to 0 otherwise.
 bool m_debugMode = false;
 
+bool m_enableDisplay = false;
 
 
 #include <stdio.h>
@@ -130,7 +131,9 @@ int main(int argc, char *argv[])
     camera.set(CV_CAP_PROP_FRAME_HEIGHT, DESIRED_CAMERA_HEIGHT);
 
     // Create a GUI window for display on the screen.
-    namedWindow(windowName); // Resizable window, might not work on Windows.
+    if(m_enableDisplay) {
+        namedWindow(windowName); // Resizable window, might not work on Windows.
+    }
 
     // Run forever, until the user hits Escape to "break" out of this loop.
     while (true) {
@@ -159,7 +162,9 @@ int main(int argc, char *argv[])
             m_stickFigureIterations--;
         }
 
-        imshow(windowName, displayedFrame);
+        if(m_enableDisplay) {
+            imshow(windowName, displayedFrame);
+        }
 
         // IMPORTANT: Wait for atleast 20 milliseconds, so that the image can be displayed on the screen!
         // Also checks if a key was pressed in the GUI window. Note that it should be a "char" to support Linux.
