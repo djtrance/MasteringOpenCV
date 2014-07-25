@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
     octoAddr.sin_family = AF_INET;
     octoAddr.sin_addr.s_addr = htonl(octoAddress);
     octoAddr.sin_port = htons(9999);
-    ssize_t octoSize = 128*120*3+1;
+    ssize_t octoSize = 128*128*3+1;
     uint8_t * octoData = (uint8_t *)calloc(octoSize, 1);
     octoData[0] = 0;
 
@@ -186,9 +186,9 @@ int main(int argc, char *argv[])
             //Mat croppedImage = displayedFrame(Rect(16, 0, 128, 120));
             for(int i = 0; i < 128; i++) {
                 for(int j = 0; j < 120; j++) {
-                    octoData[1+3*(i+j*128)] = displayedFrame.at<Vec3b>(j,i+16)[0];
-                    octoData[2+3*(i+j*128)] = displayedFrame.at<Vec3b>(j,i+16)[1];
-                    octoData[3+3*(i+j*128)] = displayedFrame.at<Vec3b>(j,i+16)[2];
+                    octoData[1+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[0];
+                    octoData[2+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[1];
+                    octoData[3+3*(i+j*128)+3*8*128] = displayedFrame.at<Vec3b>(j,i+16)[2];
                 }
             }
             sendto(octoSocket, 
