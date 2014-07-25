@@ -14,8 +14,8 @@
 
 // Try to set the camera resolution. Note that this only works for some cameras on
 // some computers and only for some drivers, so don't rely on it to work!
-const int DESIRED_CAMERA_WIDTH = 640;
-const int DESIRED_CAMERA_HEIGHT = 480;
+const int DESIRED_CAMERA_WIDTH = 160;
+const int DESIRED_CAMERA_HEIGHT = 120;
 
 const int NUM_STICK_FIGURE_ITERATIONS = 40; // Sets how long the stick figure face should be shown for skin detection.
 
